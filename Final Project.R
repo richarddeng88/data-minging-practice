@@ -44,10 +44,18 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
 
 
 
-
-
-
-
+        # TREE
+            library(caret)
+            ctrl <- trainControl(method = "cv", number = 10) 
+            tree_model <- train(classe~.,
+                                data=training,
+                                method="rpart")
+            print(tree_model$finalModel)
+            library(rattle);library(rpart.plot)
+            fancyRpartPlot(tree_model$finalModel)
+            
+        # QDA and LDA
+    
 
 
 
