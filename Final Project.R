@@ -30,9 +30,9 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
 ## TRAIN MODELS
         # KNN
             #using Preprossing to standardize the data first. 
-            #proobj <- preProcess(training[,-53], method = c("center", "scale")) # center and scale the data
+            proobj <- preProcess(training[,-53], method = c("center", "scale")) # center and scale the data
             #train_body <- predict(proobj, training[,-53])
-            #test_body <- predict(proobj, testing[,-53])
+            test_body <- predict(proobj, testing[,-53])
             #knn_training <- cbind(train_body,training[,53])
             
             ## to create a control object named ctrl that uses 10-fold CV and the oneSE secetion function. 
@@ -40,24 +40,52 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
             knn_model <- train(classe~., 
                                data=training, 
                                method="knn", 
-                               preProcess=c("center","scale")) #trControl=ctrl
-
-
+                               preProcess=c("center","scale"),
+                               tuneLength = 20,
+                               trControl=ctrl) #
+            
+            # evaluate performance
+            plot(knn_model)
+            knn_pred <- predict(knn_model, testing)
+            confusionMatrix(knn_pred, testing$classe)
 
         # TREE
             library(caret)
             ctrl <- trainControl(method = "cv", number = 10) 
             tree_model <- train(classe~.,
                                 data=training,
-                                method="rpart")
+                                method="rpart",
+                                trControl=ctrl)
             print(tree_model$finalModel)
             library(rattle);library(rpart.plot)
             fancyRpartPlot(tree_model$finalModel)
+            rpart.plot(tree_model$finalModel)
+        
+            # evaluate performance
+            tree_pred<- predict(tree_model, testing)
+            confusionMatrix(tree_pred, testing$classe)
+        
+        # RF 
+            library(caret)
+            ctrl <- trainControl(method = "cv", number = 10) 
+            rf_model <- train(classe~.,
+                                data=training,
+                                method="rf",
+                                trControl=ctrl)
+            print(rf_model$finalModel)
+
+            
+        # bagging
+            
+        # bossting
             
         # QDA and LDA
     
 
-
+        # NB method
+            
+        
+        # Neural network
 
 
 
