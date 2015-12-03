@@ -23,7 +23,7 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
         
     # DATA SPLITING
         library(caret); set.seed(1001)
-        intrain <- createDataPartition(y=train_pml$classe, p=0.75, list = F)
+        intrain <- createDataPartition(y=train_pml$classe, p=0.35, list = F)
         training <- train_pml[intrain,]; testing <- train_pml[-intrain,]
 
 
@@ -64,6 +64,12 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
             # evaluate performance
             tree_pred<- predict(tree_model, testing)
             confusionMatrix(tree_pred, testing$classe)
+                
+                # using TREE code in the testbook
+                tree1 <- tree(classe~., data = training)
+                summary(tree1)
+                cv1 <- cv.tree(tree1)
+                plot(cv1$size,cv1$dev, type = "b")
         
         # RF 
             library(caret)

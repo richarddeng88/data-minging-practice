@@ -53,9 +53,11 @@ summary(tree_bos)
 
 plot(tree_bos)
 text(tree_bos, pretty=0)
+
 ## cross validation method to see the square error in different knots. 
 cv_bos <- cv.tree(tree_bos)
 plot(cv_bos$size, cv_bos$dev, type = "b")
+
 ## use the decision tree at the best condition. 
 prune_bos <- prune.tree(tree_bos, best = 5)
 plot(prune_bos)
