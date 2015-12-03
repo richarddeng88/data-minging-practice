@@ -42,7 +42,7 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
                                method="knn", 
                                preProcess=c("center","scale"),
                                tuneLength = 20,
-                               trControl=ctrl) #
+                               trControl=ctrl) # need to set up different k values as i want
             
             # evaluate performance
             plot(knn_model)
@@ -51,7 +51,7 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
 
         # TREE
             library(caret)
-            ctrl <- trainControl(method = "cv", number = 10) 
+            ctrl <- trainControl(method = "cv", number = 10) # 10 fold cross validation
             tree_model <- train(classe~.,
                                 data=training,
                                 method="rpart",
@@ -70,6 +70,13 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
                 summary(tree1)
                 cv1 <- cv.tree(tree1)
                 plot(cv1$size,cv1$dev, type = "b")
+                m=which.min(cv1$dev)
+                points(cv1$size[m],cv1$dev[m], col="red", cex=2, pch=20)
+                # pruned tree
+                pruned <- prune.tree(tree1,best=cv1$size[m])
+                tree1_pred <- predict(pruned, testing[-53])
+                confusionMatrix(tree1_pred, testing$classe)
+                
         
         # RF 
             library(caret)
@@ -79,17 +86,46 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
                                 method="rf",
                                 trControl=ctrl)
             print(rf_model$finalModel)
+            
+            #evaluate performance
+            rf_pred <- predict(rf_model, testing)
+            confusionMatrix(rf_pred, testing$classe)
 
             
         # bagging
             
-        # bossting
+        # boosting
+            gbm_model <- train(classe~.,
+                               data = training,
+                               method="gbm",
+                               trControl=ctrl)
+            gbm_pred <- predict(gbm_model, testing)
+            confusionMatrix(gbm_pred, testing$classe)
             
         # QDA and LDA
-    
-
-        # NB method
+            # LDA
+            lda_model <- train(classe~.,
+                               data = training,
+                               method="lda",
+                               trControl=ctrl)
+            lda_pred <- predict(lda_model, testing)
+            confusionMatrix(lda_pred, testing$classe)
             
+            # QDA
+            qda_model <- train(classe~.,
+                               data = training,
+                               method="qda",
+                               trControl=ctrl)
+            qda_pred <- predict(qda_model, testing)
+            confusionMatrix(qda_pred, testing$classe)
+            
+        # NB method
+            nb_model <- train(classe~.,
+                               data = training,
+                               method="nb",
+                               trControl=ctrl)
+            nb_pred <- predict(nb_model, testing)
+            confusionMatrix(nb_pred, testing$classe)
         
         # Neural network
 
