@@ -78,7 +78,7 @@ set.seed(1)
 train <- sample(nrow(bos), nrow(bos)/2)
 # here the mtry means that all 13 predictors should be considered for each split of 
 # the tree. 
-bag_bos <- randomForest(medv~., data=bos, subset=train, mtry=13, importance=T)
+bag_bos <- randomForest(medv~., data=bos, subset=train, mtry=13, importance=T) # when mtry=p, it's bagging
 
 yhat_bag <- predict(bag_bos, newdata = bos[-train,])
 plot(yhat_bag, bos_test)
@@ -100,7 +100,8 @@ library(MASS)
 library(gbm)
 set.seed(1)
 boost_bos <- gbm(medv~., data=bos[train,], distribution= "gaussian")
-summary(boost_bos) # this produces a relative influence plot and also outputs the relative influence statistics. 
+summary(boost_bos) 
+# this produces a relative influence plot and also outputs the relative influence statistics. 
 
 # we can also produce partial dependence plots for these two variables. these plots illustrate the
 # marginal effect of the selected variables on the response after integrating out the other variables. 

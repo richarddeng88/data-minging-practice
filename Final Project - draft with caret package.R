@@ -23,7 +23,7 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
         
     # DATA SPLITING
         library(caret); set.seed(1001)
-        intrain <- createDataPartition(y=train_pml$classe, p=0.35, list = F)
+        intrain <- createDataPartition(y=train_pml$classe, p=0.1, list = F)
         training <- train_pml[intrain,]; testing <- train_pml[-intrain,]
 
 
@@ -41,7 +41,7 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
                                data=training, 
                                method="knn", 
                                preProcess=c("center","scale"),
-                               tuneLength = 20,
+                               tuneLength = 40,
                                trControl=ctrl) # need to set up different k values as i want
             
             # evaluate performance
@@ -93,8 +93,18 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
 
             
         # bagging
+            library(caret)
+            ctrl <- trainControl(method = "cv", number = 10) 
+            bag_model <- train(classe~.,
+                               data = training,
+                               method="bag",
+                               trControl=ctrl)
+            bag_pred <- predict(bag_model, testing)
+            confusionMatrix(bag_pred, testing$classe)   
             
         # boosting
+            library(caret)
+            ctrl <- trainControl(method = "cv", number = 10) 
             gbm_model <- train(classe~.,
                                data = training,
                                method="gbm",
@@ -104,6 +114,8 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
             
         # QDA and LDA
             # LDA
+            library(caret)
+            ctrl <- trainControl(method = "cv", number = 10) 
             lda_model <- train(classe~.,
                                data = training,
                                method="lda",
@@ -112,6 +124,8 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
             confusionMatrix(lda_pred, testing$classe)
             
             # QDA
+            library(caret)
+            ctrl <- trainControl(method = "cv", number = 10) 
             qda_model <- train(classe~.,
                                data = training,
                                method="qda",
@@ -119,16 +133,47 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
             qda_pred <- predict(qda_model, testing)
             confusionMatrix(qda_pred, testing$classe)
             
-        # NB method
-            nb_model <- train(classe~.,
-                               data = training,
-                               method="nb",
-                               trControl=ctrl)
-            nb_pred <- predict(nb_model, testing)
-            confusionMatrix(nb_pred, testing$classe)
         
         # Neural network
-
+            #using Preprossing to standardize the data first. 
+            proobj <- preProcess(training[,-53], method = c("center", "scale")) # center and scale the data
+            train_body <- predict(proobj, training[,-53])
+            test_body <- predict(proobj, testing[,-53])
+            nn_training <- cbind(train_body,training[,53])
+            nn_testing <- cbind(test_body, testing[53])
+            
+            # using "caret" package
+            library(caret)
+            ctrl <- trainControl(method = "cv", number = 10) 
+            nn_model <- train(classe~.,
+                               data = training,
+                               method="nnet",
+                               trControl=ctrl)
+            nn_pred <- predict(nn_model, testing)
+            confusionMatrix(nn_pred, testing$classe)
+            
+            # using "nnet"package
+            library(nnet)
+            a = nnet(classe~., data=training,size=5,maxit=10000)
+            
+            ## EVALUATING MODEL PERFORMANCE
+            nn_pred <- predict(a,newdata=nn_testing,type="class")
+            print(confusionMatrix(nn_pred, nn_testing[,53]))
+            
+                ## IMPROVING PERFORMANCE
+                # we trying differnet hidden node size =10
+                a = nnet(classe~., data=training,size=10,maxit=10000)
+                nn_pred <- predict(a,newdata=validation,type="class")
+                print(confusionMatrix(nn_pred, validation[,53])) # 0/9324497
+                
+                # we trying differnet hidden node size=15 
+                a = nnet(classe~., data=training,size=15,maxit=10000)
+                nn_pred <- predict(a,newdata=validation,type="class")
+                print(confusionMatrix(nn_pred, validation[,53])) # 0.9454499
+    
+            
+        # logistic regression with lasso and ridge
+        
 
 
 
