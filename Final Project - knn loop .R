@@ -4,7 +4,7 @@ intrain <- createDataPartition(y=train_pml$classe, p=0.5, list = F)
 training <- train_pml[intrain,]; testing <- train_pml[-intrain,]
 
     # knn loop
-    train_size <- seq(100, 9000, 100); t=0 ; accuracy <- rep(NA,length(x));best_k <- rep(NA,length(x)); x<- c(100,200,900)
+    train_size <- seq(100, 9000, 100); t=0 ; accuracy <- rep(NA,length(x)); best_k <- rep(NA,length(x)); x<- c(100,200,900)
     for (i in x){
         split <- sample(dim(training)[1], i)
         knn_train <- training[split,]
