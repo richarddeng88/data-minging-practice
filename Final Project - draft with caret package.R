@@ -37,11 +37,13 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
             
             ## to create a control object named ctrl that uses 10-fold CV and the oneSE secetion function. 
             ctrl <- trainControl(method = "cv", number = 10) 
+            grid <- expand.grid(k=c(1:10,12,14,16,18,seq(20,80,3)))
             knn_model <- train(classe~., 
                                data=training, 
                                method="knn", 
                                preProcess=c("center","scale"),
-                               tuneLength = 40,
+                               tuneGrid = grid,
+                               #tuneLength = 40,
                                trControl=ctrl) # need to set up different k values as i want
             
             # evaluate performance
@@ -172,7 +174,6 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
                 print(confusionMatrix(nn_pred, validation[,53])) # 0.9454499
     
             
-        # logistic regression with lasso and ridge
         
 
 

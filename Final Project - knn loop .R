@@ -3,30 +3,76 @@ library(caret); set.seed(1001)
 intrain <- createDataPartition(y=train_pml$classe, p=0.5, list = F)
 training <- train_pml[intrain,]; testing <- train_pml[-intrain,]
 
-    # knn loop
-    train_size <- seq(100, 9000, 100); t=0 ; accuracy <- rep(NA,length(x)); best_k <- rep(NA,length(x)); x<- c(100,200,900)
-    for (i in x){
+    # knn loop with different training size
+    train_size <- seq(100, 9000, 200); t=0 ; knn_accuracy <- rep(NA,length(train_size)); best_k <- rep(NA,length(train_size)); x <- c(100,200,900)
+    for (i in train_size){
         split <- sample(dim(training)[1], i)
         knn_train <- training[split,]
         t=t+1
         
         # train knn model
         ctrl <- trainControl(method = "cv", number = 10) 
+        grid <- expand.grid(k=c(1:10,12,14,16,18,seq(20,80,3)))
         knn_model <- train(classe~., 
                            data=knn_train, 
                            method="knn", 
                            preProcess=c("center","scale"),
-                           tuneLength = 40,
+                           tuneGrid = grid,
+                           #tuneLength = 40,
                            trControl=ctrl) # need to set up different k values as i want
         
         # evaluate performance
         # plot(knn_model)
         knn_pred <- predict(knn_model, testing)
         best_k[t] <- as.numeric(knn_model$bestTune)
-        accuracy[t] <- confusionMatrix(knn_pred, testing$classe)$overall[1]
-}
+        knn_accuracy[t] <- confusionMatrix(knn_pred, testing$classe)$overall[1]
+        
+        }
 
-
+    
+    # QDA loop with different training size
+    train_size <- seq(100, 9000, 200); t=0 ; qda_accuracy <- rep(NA,length(train_size)); best_k <- rep(NA,length(train_size)); x <- c(100,200,900)
+    for (i in train_size){
+        split <- sample(dim(training)[1], i)
+        qda_training <- training[split,]
+        t=t+1
+        
+        # train knn model
+        ctrl <- trainControl(method = "cv", number = 10) 
+        qda_model <- train(classe~.,
+                           data = qda_training,
+                           method="qda",
+                           trControl=ctrl)
+        
+        # evaluate performance
+        # plot(qda_model)
+        qda_pred <- predict(qda_model, testing)
+        qda_accuracy[t] <- confusionMatrix(qda_pred, testing$classe)$overall[1]
+        
+    }
+    
+    # RF loop with different training size
+    train_size <- seq(100, 9000, 200); t=0 ; rf_accuracy <- rep(NA,length(train_size)); best_mtry <- rep(NA,length(train_size)); x <- c(100,200,900)
+    for (i in train_size){
+        split <- sample(dim(training)[1], i)
+        rf_training <- training[split,]
+        t=t+1
+        
+        # train knn model
+        ctrl <- trainControl(method = "cv", number = 10) 
+        grid <- expand.grid(.mtry=c(2,4,6,8,10,12) )
+        rf_model <- train(classe~.,
+                          data=rf_training,
+                          method="rf",
+                          tuneGrid = grid,
+                          trControl=ctrl)
+        
+        #evaluate performance
+        rf_pred <- predict(rf_model, testing)
+        best_mtry[t] <- as.numeric(rf_model$bestTune)
+        rf_accuracy[t] <- confusionMatrix(rf_pred, testing$classe)$overall[1]
+        
+    }
 
 
 
