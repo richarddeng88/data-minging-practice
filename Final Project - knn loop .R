@@ -29,7 +29,9 @@ training <- train_pml[intrain,]; testing <- train_pml[-intrain,]
         
     }
     
-
+        #ploting
+        plot(train_size,knn_accuracy, type = "l")
+        plot(train_size,best_k, type="l")
     
     # QDA loop with different training size
     train_size <- seq(100, 9000, 200); t=0 ; qda_accuracy <- rep(NA,length(train_size)); best_k <- rep(NA,length(train_size)); x <- c(100,200,900)
