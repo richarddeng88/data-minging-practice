@@ -27,7 +27,8 @@ training <- train_pml[intrain,]; testing <- train_pml[-intrain,]
         best_k[t] <- as.numeric(knn_model$bestTune)
         knn_accuracy[t] <- confusionMatrix(knn_pred, testing$classe)$overall[1]
         
-        }
+    }
+    
 
     
     # QDA loop with different training size

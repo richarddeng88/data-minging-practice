@@ -24,7 +24,7 @@ cv.res <- xgb.cv(data=train$data, nfold=5, label = train$label, nrounds = 2,
                objective= "binary:logistic", eval_metric="auc")
 
 
-## higgs example===========================================================
+## higgs example====================================================================
 dtrain <- read.csv("data/higgs/training.csv", header = T)
 dtest <- read.csv("data/higgs/test.csv", header = T)
 
