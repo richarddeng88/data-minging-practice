@@ -23,7 +23,8 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
         
     # DATA SPLITING
         library(caret); set.seed(1001)
-        intrain <- createDataPartition(y=train_pml$classe, p=0.5, list = F)
+        #intrain <- createDataPartition(y=train_pml$classe, p=0.5, list = F)
+        intrain <- sample(dim(train_pml)[1],9000)
         training <- train_pml[intrain,]; testing <- train_pml[-intrain,]
 
 
@@ -36,6 +37,7 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
             #knn_training <- cbind(train_body,training[,53])
             
             ## to create a control object named ctrl that uses 10-fold CV and the oneSE secetion function. 
+            library(caret)
             ctrl <- trainControl(method = "cv", number = 10) 
             grid <- expand.grid(k=c(5,7,9))
             knn_model <- train(classe~., 
@@ -54,6 +56,7 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
         # TREE
             library(caret)
             ctrl <- trainControl(method = "cv", number = 10) # 10 fold cross validation
+            
             tree_model <- train(classe~.,
                                 data=training,
                                 method="rpart",
@@ -95,7 +98,7 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
 
             
         # bagging
-            library(caret)
+            library(caret);library(randomForest)
             ctrl <- trainControl(method = "cv", number = 10) 
             bag_model <- train(classe~.,
                                data = training,
@@ -103,6 +106,10 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
                                trControl=ctrl)
             bag_pred <- predict(bag_model, testing)
             confusionMatrix(bag_pred, testing$classe)   
+          
+            bag_model <- randomForest(classe~., data=training, mtry=53)
+            bag_pred <- predict(bag_model, testing)
+            confusionMatrix(bag_pred, testing$classe) 
             
         # boosting
             library(caret)
@@ -176,6 +183,16 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
             
         
 
-
-
-
+    # bar plot the response
+    table(testing$classe)
+    library(ggplot2)
+    ggplot(testing,aes(x=classe,fill=classe))+geom_bar()
+    
+    # confusion matrix
+    confusionMatrix(knn_pred, testing$classe)
+    confusionMatrix(rf_pred, testing$classe)
+    
+    confusionMatrix(qda_pred, testing$classe)
+    confusionMatrix(tree_pred, testing$classe)
+    confusionMatrix(bag_pred, testing$classe)
+    
