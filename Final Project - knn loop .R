@@ -1,11 +1,11 @@
 # devide the half train data into 100,200,300......9000,
 library(caret); set.seed(1001)
 train_pml <-train_pml[sample(dim(train_pml)[1], 18000),] # get 18,000 observation to wrok on
-intrain <- createDataPartition(y=train_pml$classe, p=0.5, list = F)
+intrain <- sample(dim(train_pml)[1], 9000)
 training <- train_pml[intrain,]; testing <- train_pml[-intrain,]
 
-    # knn loop with different training size
-    train_size <- seq(100, 1000, 100); t=0 
+    # knn loop with different training siz
+    train_size <- seq(200, 9000, 200); t=0 
     knn_accuracy <- rep(NA,length(train_size))
     knn_train_accuracy <- rep(NA, length(train_size))
     best_k <- rep(NA,length(train_size)); x <- c(100,200,900)
@@ -38,10 +38,11 @@ training <- train_pml[intrain,]; testing <- train_pml[-intrain,]
     
         #ploting
         plot(train_size,knn_accuracy, type = "l")
+        plot(train_size,knn_train_accuracy, type = "l")
         plot(train_size,best_k, type="l")
     
     # QDA loop with different training size
-    train_size <- seq(400, 800, 100); t=0
+    train_size <- seq(600, 9000, 200); t=0
     qda_test_accuracy <- rep(NA,length(train_size)) 
     qda_train_accuracy <- rep(NA,length(train_size))
     for (i in train_size){
@@ -65,17 +66,22 @@ training <- train_pml[intrain,]; testing <- train_pml[-intrain,]
     }
         
     plot(train_size,qda_test_accuracy, type = "l")
+    plot(train_size,qda_train_accuracy, type = "l")
     #plot(train_size,best_mtry, type="l")  
     
     
     # RF loop with different training size
-    train_size <- seq(100, 1000, 100); t=0 ; rf_accuracy <- rep(NA,length(train_size)); best_mtry <- rep(NA,length(train_size)); x <- c(100,200,900)
+    train_size <- seq(200, 9000, 200); t=0 ; 
+    rf_accuracy <- rep(NA,length(train_size)); 
+    rf_train_accuracy <- rep(NA,length(train_size))
+    best_mtry <- rep(NA,length(train_size)); 
+    x <- c(100,200,900)
     for (i in train_size){
         split <- sample(dim(training)[1], i)
         rf_training <- training[split,]
         t=t+1
         
-        # train knn model
+        # train rf model
         ctrl <- trainControl(method = "cv", number = 10) 
         grid <- expand.grid(.mtry=c(2,4,6,8,10,12))
         rf_model <- train(classe~.,
@@ -96,17 +102,38 @@ training <- train_pml[intrain,]; testing <- train_pml[-intrain,]
   
         plot(train_size,rf_accuracy, type = "l")
         plot(train_size,best_mtry, type="l")
+        plot(train_size,rf_train_accuracy, type = "l")
 
 
+        # VISULIZATION
+        qda_train_accuracy <- c(0.9902,0.9901,qda_train_accuracy)
+        qda_train_accuracy <- c(0.9902,0.9901,qda_train_accuracy)
+        train_size <- seq(200, 9000, 200)
+        knn <- data.frame(size=train_size, test_ac=knn_accuracy, train_ac=knn_train_accuracy,methods="knn")
+        qda <- data.frame(size=train_size, test_ac=qda_test_accuracy,train_ac=qda_train_accuracy, methods="qda")
+        rf <- data.frame(size=train_size, test_ac=rf_accuracy, train_ac=rf_train_accuracy, methods="rf")
+        
+        df <- rbind(knn,qda,rf)
+        library(ggplot2);library(dplyr)
+        df1 <- group_by(df, methods)
+        ggplot(df1, aes(x=size,y=test_ac, col=methods))+ geom_line()
+        ggplot(df1, aes(x=size,y=train_ac, col=methods))+ geom_line()
+        
+        #plot(train_size,knn_accuracy,type="l", ylim = c(0,1))
+        #points(train_size,qda_test_accuracy,type="l",col="red")
+        #points(train_size,rf_accuracy, type = "l", col="blue")
+        
+        
+        #best mtry
+        plot(train_size,best_mtry,type="l",ylim = c(2,12), xlim = c(0,9000),xlab = "Train Size",
+             ylab = "Best Mtry",
+             main = "optimum Mtry in random forest method")
+        #best k
+        plot(train_size,best_k,type="l",ylim = c(0,30), xlim = c(0,9000),xlab = "Train Size",
+             ylab = "Best K",
+             main = "optimum k in KNN method")
 
 
-
-
-
-
-
-
-
-
-
+        
+        qqplot(iris,aes(Sepal.Length,Sepal.Width, color=Species))+geom_line()
 
