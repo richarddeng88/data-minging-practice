@@ -15,7 +15,7 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
         
         # REMOVE DESCREIPTIVE FEATURES. 
         excludecols <- c("X", "user_name", "raw_timestamp_part_1", "raw_timestamp_part_2", 
-                         "cvtd_timestamp", "num_window")
+                         "cvtd_timestamp", "num_window","new_window")
         train_pml <- train_pml[, !names(train_pml) %in% excludecols]
         
         # CLEANING
@@ -23,7 +23,7 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
         
     # DATA SPLITING
         library(caret); set.seed(1001)
-        intrain <- createDataPartition(y=train_pml$classe, p=0.1, list = F)
+        intrain <- createDataPartition(y=train_pml$classe, p=0.5, list = F)
         training <- train_pml[intrain,]; testing <- train_pml[-intrain,]
 
 
@@ -37,7 +37,7 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
             
             ## to create a control object named ctrl that uses 10-fold CV and the oneSE secetion function. 
             ctrl <- trainControl(method = "cv", number = 10) 
-            grid <- expand.grid(k=c(1:10,12,14,16,18,seq(20,80,3)))
+            grid <- expand.grid(k=c(5,7,9))
             knn_model <- train(classe~., 
                                data=training, 
                                method="knn", 

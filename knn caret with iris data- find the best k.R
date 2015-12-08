@@ -11,6 +11,6 @@ testing <- iris[-intrain,]
                        #preProcess=c("center","scale"),
                        tuneGrid = grid)
 
-
-    
 }
+
+knn_model
