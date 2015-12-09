@@ -95,6 +95,13 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
             #evaluate performance
             rf_pred <- predict(rf_model, testing)
             confusionMatrix(rf_pred, testing$classe)
+            
+            #using text code, get importance 
+            library(randomForest)
+            rf_model_textbook <- randomForest(classe~., data=training, mtry=12, importance=TRUE)
+            rf_pred_textbook=predict(rf_model_textbook, testing)
+            confusionMatrix(rf_pred_textbook,testing$classe)
+            importance(rf.hitters)
 
             
         # bagging
@@ -117,9 +124,13 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
             gbm_model <- train(classe~.,
                                data = training,
                                method="gbm",
-                               trControl=ctrl)
+                               #trControl=ctrl,
+                               verbose=F)
             gbm_pred <- predict(gbm_model, testing)
             confusionMatrix(gbm_pred, testing$classe)
+            
+              # text book without CV
+              gbm_model
             
         # QDA and LDA
             # LDA
@@ -189,10 +200,10 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
     ggplot(testing,aes(x=classe,fill=classe))+geom_bar()
     
     # confusion matrix
-    confusionMatrix(knn_pred, testing$classe)
-    confusionMatrix(rf_pred, testing$classe)
-    
-    confusionMatrix(qda_pred, testing$classe)
-    confusionMatrix(tree_pred, testing$classe)
-    confusionMatrix(bag_pred, testing$classe)
+    confusionMatrix(knn_pred, testing$classe)$table
+    confusionMatrix(rf_pred, testing$classe)$table
+    confusionMatrix(lda_pred, testing$classe)$table
+    confusionMatrix(qda_pred, testing$classe)$table
+    confusionMatrix(tree_pred, testing$classe)$table
+    confusionMatrix(bag_pred, testing$classe)$table
     

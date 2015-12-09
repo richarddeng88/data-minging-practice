@@ -110,29 +110,27 @@ training <- train_pml[intrain,]; testing <- train_pml[-intrain,]
         qda_train_accuracy <- c(0.9902,0.9901,qda_train_accuracy)
         train_size <- seq(200, 9000, 200)
         
-        knn <- data.frame(size=train_size, test_ac=knn_accuracy, train_ac=knn_train_accuracy,methods="knn")
-        qda <- data.frame(size=train_size, test_ac=qda_test_accuracy,train_ac=qda_train_accuracy, methods="qda")
-        rf <- data.frame(size=train_size, test_ac=rf_accuracy, train_ac=rf_train_accuracy, methods="rf")
+        knn <- data.frame(train_size=train_size, test_ac=knn_accuracy, train_ac=knn_train_accuracy,methods="knn")
+        qda <- data.frame(train_size=train_size, test_ac=qda_test_accuracy,train_ac=qda_train_accuracy, methods="qda")
+        rf <- data.frame(train_size=train_size, test_ac=rf_accuracy, train_ac=rf_train_accuracy, methods="rf")
         df <- rbind(knn,qda,rf)
         
         library(ggplot2);library(dplyr)
         #df1 <- group_by(df, methods)
-        ggplot(df, aes(x=size,y=test_ac, col=methods))+ geom_line()
-        ggplot(df, aes(x=size,y=train_ac, col=methods))+ geom_line()
+        ggplot(df, aes(x=train_size,y=test_ac, col=methods))+ geom_line()
+        ggplot(df, aes(x=train_size,y=train_ac, col=methods))+ geom_line()
+
 
         ##have a try 2
-        knn1 <- rbind(data.frame(size=train_size, accuracy=knn_train_accuracy,type="knn-train",method="knn"),
-                      data.frame(size=train_size, accuracy=knn_accuracy, type="knn-test", method="knn"))
-        qda1 <- rbind(data.frame(size=train_size, accuracy=qda_train_accuracy,type="qda-train",method="qda"),
-                      data.frame(size=train_size, accuracy=qda_test_accuracy, type="qda-test", method="qda"))
-        rf1 <- rbind(data.frame(size=train_size, accuracy=rf_train_accuracy,type="rf-train",method="rf"),
-                     data.frame(size=train_size, accuracy=rf_accuracy , type="rf-test", method="rf"))
-        
-        ggplot(knn1, aes(x=size, y=accuracy, col=type))+geom_line()
-        ggplot(qda1, aes(x=size, y=accuracy, col=type))+geom_line()
-        ggplot(rf1, aes(x=size, y=accuracy, col=type))+geom_line()
-        
-        
+        knn1 <- rbind(data.frame(train_size=train_size, accuracy=knn_train_accuracy,type="train",method="knn"),
+                      data.frame(train_size=train_size, accuracy=knn_accuracy, type="test", method="knn"))
+        qda1 <- rbind(data.frame(train_size=train_size, accuracy=qda_train_accuracy,type="train",method="qda"),
+                      data.frame(train_size=train_size, accuracy=qda_test_accuracy, type="test", method="qda"))
+        rf1 <- rbind(data.frame(train_size=train_size, accuracy=rf_train_accuracy,type="train",method="rf"),
+                     data.frame(train_size=train_size, accuracy=rf_accuracy , type="test", method="rf"))
+        df1 <- rbind(knn1,qda1,rf1)
+        ggplot(df1, aes(x=train_size, y=accuracy, col=type))+geom_line()+facet_grid(.~method)
+        ggplot(df1, aes(x=train_size, y=accuracy, col=method))+geom_line()+facet_grid(type~.)
         #plot(train_size,knn_accuracy,type="l", ylim = c(0,1))
         #points(train_size,qda_test_accuracy,type="l",col="red")
         #points(train_size,rf_accuracy, type = "l", col="blue")
@@ -146,8 +144,6 @@ training <- train_pml[intrain,]; testing <- train_pml[-intrain,]
         plot(train_size,best_k,type="l",ylim = c(0,30), xlim = c(0,9000),xlab = "Train Size",
              ylab = "Best K",
              main = "optimum k in KNN method")
-
-
         
         qqplot(iris,aes(Sepal.Length,Sepal.Width, color=Species))+geom_line()
 
