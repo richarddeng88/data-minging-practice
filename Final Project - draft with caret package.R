@@ -89,19 +89,24 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
             rf_model <- train(classe~.,
                                 data=training,
                                 method="rf",
+                                importance=T,
                                 trControl=ctrl)
             print(rf_model$finalModel)
             
             #evaluate performance
             rf_pred <- predict(rf_model, testing)
             confusionMatrix(rf_pred, testing$classe)
+            #plot the importance
+            varImpPlot(rf_model$finalModel)
             
-            #using text code, get importance 
-            library(randomForest)
-            rf_model_textbook <- randomForest(classe~., data=training, mtry=12, importance=TRUE)
-            rf_pred_textbook=predict(rf_model_textbook, testing)
-            confusionMatrix(rf_pred_textbook,testing$classe)
-            importance(rf.hitters)
+                #using text code, get importance 
+                library(randomForest)
+                rf_model_textbook <- randomForest(classe~., data=training, mtry=12, importance=TRUE)
+                rf_pred_textbook=predict(rf_model_textbook, testing)
+                confusionMatrix(rf_pred_textbook,testing$classe)
+                importance(rf_model_textbook)
+                # plot the importance 
+                varImpPlot(rf_model_textbook)
 
             
         # bagging
@@ -109,16 +114,18 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
             ctrl <- trainControl(method = "cv", number = 10) 
             bag_model <- train(classe~.,
                                data = training,
-                               method="bag",
-                               trControl=ctrl)
+                               #trControl=ctrl,
+                               method="bag")
             bag_pred <- predict(bag_model, testing)
             confusionMatrix(bag_pred, testing$classe)   
           
+
+            # using code from testbook. 
             bag_model <- randomForest(classe~., data=training, mtry=53)
             bag_pred <- predict(bag_model, testing)
             confusionMatrix(bag_pred, testing$classe) 
             
-        # boosting
+        # boosting,     here caret package help us find the best parameters.
             library(caret)
             ctrl <- trainControl(method = "cv", number = 10) 
             gbm_model <- train(classe~.,
@@ -129,8 +136,18 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
             gbm_pred <- predict(gbm_model, testing)
             confusionMatrix(gbm_pred, testing$classe)
             
-              # text book without CV
-              gbm_model
+              # text book without CV, using default parameter. 
+              gbm_model_text <- gbm(classe~., 
+                                    data=training,
+                                    distribution="gaussian",
+                                    n.tree=5000,
+                                    interaction.depth=4)
+              summary(gbm_model_text)
+              
+              # 
+              par(mfrow=c(1,2))
+              plot(boost, i='rm')
+              plot(boost, i='lstat')
             
         # QDA and LDA
             # LDA
