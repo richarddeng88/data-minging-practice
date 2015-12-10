@@ -86,10 +86,12 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
         # RF 
             library(caret)
             ctrl <- trainControl(method = "cv", number = 10) 
+            grid <- expand.grid(.mtry=c(2,4,6,8,10,12,14,16,18,20))
             rf_model <- train(classe~.,
                                 data=training,
                                 method="rf",
                                 importance=T,
+                                tuneGrid = grid,
                                 trControl=ctrl)
             print(rf_model$finalModel)
             
@@ -97,6 +99,7 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
             rf_pred <- predict(rf_model, testing)
             confusionMatrix(rf_pred, testing$classe)
             #plot the importance
+            importance(rf_model$finalModel)
             varImpPlot(rf_model$finalModel)
             
                 #using text code, get importance 
