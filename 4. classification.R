@@ -1,6 +1,7 @@
 library(MASS);library(ISLR);library(dplyr)
 def <- Default
-par(mfrow=c(1,1))
+prop.table(table(def$default))
+par(mfrow=c(1,2))
 
 plot(def$balance,def$income,xlab="balance",ylab="income",col=def$default,pch=20)
 plot(def$balance,def$income,xlab="balance",ylab="income",col=def$student,pch=20)
@@ -9,13 +10,16 @@ plot(def$balance,def$income,xlab="balance",ylab="income",col=def$student,pch=20)
     df_no_0 <- filter(def, balance!=0)
     plot(df_no_0$balance,df_no_0$income, pch=20)
     
+    
     # try tree model
     library(caret)
     intrain <- createDataPartition(def$default, p=0.8, list=F)
     training <- def[intrain,]; testing<- def[-intrain,]
     tree_model <- train(default~.,
                         data=training,
-                        mothod="tree")
+                        mothod="rpart")
+    tree_pred <- predict(tree_model, testing)
+    confusionMatrix(tree_pred, testing$default)
     
     
 
@@ -31,6 +35,7 @@ plot(def$student,def$income,col=c("lightblue","green"),
      xlab="Student",ylab="Income")
 
 plot(def$balance,def$student,col=def$default)
+
 ###-==========================ploting test=========================================
 library(ggplot2)
 qplot(balance,income,data=def,color=default,fill=default,geom=c("point","smooth"))
