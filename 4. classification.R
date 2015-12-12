@@ -12,7 +12,7 @@ plot(def$balance,def$income,xlab="balance",ylab="income",col=def$student,pch=20)
     
     
     # try tree model
-    library(caret)
+    library(caret);library(rpart.plot)
     intrain <- createDataPartition(def$default, p=0.8, list=F)
     training <- def[intrain,]; testing<- def[-intrain,]
     tree_model <- train(default~.,
@@ -21,6 +21,12 @@ plot(def$balance,def$income,xlab="balance",ylab="income",col=def$student,pch=20)
     tree_pred <- predict(tree_model, testing)
     confusionMatrix(tree_pred, testing$default)
     
+        # using "tree" package
+        library(tree)
+        tree_model_1 <- tree(default~., data=training)
+        plot(tree_model_1 )
+        text(tree_model_1, preety=0)
+        
     
 
 par(mfrow=c(1,2))
@@ -34,7 +40,6 @@ plot(def$student,def$balance,col=c("lightblue","green"),
 plot(def$student,def$income,col=c("lightblue","green"),
      xlab="Student",ylab="Income")
 
-plot(def$balance,def$student,col=def$default)
 
 ###-==========================ploting test=========================================
 library(ggplot2)
@@ -43,13 +48,12 @@ qplot(balance,income,data=def,color=default,fill=default,geom=c("point","smooth"
 library(lattice)
 xyplot(income~balance|default,data=def)
 ##======================================================================
-# run logistic regression
-contrasts(def$default)
-def.glm <- glm(default~balance+income+student, family = "binomial", data = def)
-summary(def.glm)
-
-def.glm <- glm(default~balance+income+student, family = "binomial", data = def)
-summary(def.glm)
+    # run logistic regression
+    contrasts(def$default)
+    def.glm <- glm(default~balance+income+student, family = "binomial", data = def)
+    summary(def.glm)
+    glm_probs <- predict(def.glm, type="response")
+    glm_probs[1:10]
 
 # try to plot
 plot(def$balance,def$default)
@@ -69,7 +73,7 @@ plot(stock$Volume)
 glm.fit <- glm(Direction~Lag1+Lag2+Lag3+Lag4+Lag5+Volume, data=stock,family="binomial")
 summary(glm.fit)
 
-ontrasts(stock$Direction) #check if a dummy variable with a 1 for up?
+contrasts(stock$Direction) #check if a dummy variable with a 1 for up?
 glm.probs <- predict(glm.fit, type="response")
 glm.probs[1:10]
 
