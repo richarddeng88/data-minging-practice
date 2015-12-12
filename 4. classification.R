@@ -1,9 +1,23 @@
-library(MASS)
-library(ISLR)
+library(MASS);library(ISLR);library(dplyr)
 def <- Default
 par(mfrow=c(1,1))
+
 plot(def$balance,def$income,xlab="balance",ylab="income",col=def$default,pch=20)
 plot(def$balance,def$income,xlab="balance",ylab="income",col=def$student,pch=20)
+
+    # tak out all points that balance =0
+    df_no_0 <- filter(def, balance!=0)
+    plot(df_no_0$balance,df_no_0$income, pch=20)
+    
+    # try tree model
+    library(caret)
+    intrain <- createDataPartition(def$default, p=0.8, list=F)
+    training <- def[intrain,]; testing<- def[-intrain,]
+    tree_model <- train(default~.,
+                        data=training,
+                        mothod="tree")
+    
+    
 
 par(mfrow=c(1,2))
 plot(def$default,def$balance,col=c("lightblue","lightgreen"),
